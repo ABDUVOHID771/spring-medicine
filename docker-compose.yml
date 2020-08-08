@@ -1,0 +1,45 @@
+version: '3.7'
+services:
+  mysql:
+    image: mysql:latest
+    container_name: dbase_1
+    volumes:
+      - ./database:/var/lib/mysql
+    expose:
+      - 3306
+    environment:
+      - "MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}"
+      - "MYSQL_USER=${MYSQL_USER}"
+      - "MYSQL_PASSWORD=${MYSQL_PASSWORD}"
+      - "MYSQL_DATABASE=${MYSQL_DATABASE}"
+    ports:
+      - "${MYSQL_PORT}:3306"
+    restart: always
+    networks:
+      - medicine-app
+
+  spring-medicine:
+    image: spring-medicine:latest
+    container_name: spring-medicine
+    expose:
+      - ${SERVER_PORT}
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
+    environment:
+      - SPRING_PROFILES_ACTIVE=local
+      - "MYSQL_HOST=${MYSQL_HOST}"
+      - "MYSQL_PORT=${MYSQL_PORT}"
+      - "MYSQL_USER=${MYSQL_USER}"
+      - "MYSQL_PASSWORD=${MYSQL_PASSWORD}"
+      - "MYSQL_DATABASE=${MYSQL_DATABASE}"
+      - "SERVER_PORT=${SERVER_PORT}"
+    restart: always
+    depends_on:
+      - mysql
+    links:
+      - mysql
+    networks:
+      - medicine-app
+
+networks:
+  medicine-app:

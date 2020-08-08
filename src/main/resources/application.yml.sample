@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: spring-manager
+  datasource:
+    url: # jdbc:mysql://host:port/$database?autoReconnect=true&serverTimezone=UTC&useLegacyDatetimeCode=false&useUnicode=yes&characterEncoding=UTF-8
+    username: # username
+    password: # password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      connection-test-query: SELECT 1
+  jpa:
+    database: mysql
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        jdbc.time_zone: UTC
+server:
+  port: # port
