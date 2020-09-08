@@ -1,13 +1,11 @@
 package com.example.springmedicine.controller;
 
 import com.example.springmedicine.dao.domain.Doctors;
-import com.example.springmedicine.dao.domain.Patients;
 import com.example.springmedicine.service.DoctorsService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Set;
 import java.util.UUID;
 
 @RestController

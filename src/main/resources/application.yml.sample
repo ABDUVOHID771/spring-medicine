@@ -1,6 +1,6 @@
 spring:
   application:
-    name: spring-manager
+    name: application-name
   datasource:
     url: # jdbc:mysql://host:port/$database?autoReconnect=true&serverTimezone=UTC&useLegacyDatetimeCode=false&useUnicode=yes&characterEncoding=UTF-8
     username: # username
