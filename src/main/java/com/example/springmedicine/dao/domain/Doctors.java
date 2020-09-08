@@ -53,4 +53,17 @@ public class Doctors extends BaseEntity {
         }
     }
 
+    @Column(unique = true, nullable = false, updatable = false)
+    private Long baseId;
+
+    @Transient
+    private static Long sequence = 1555L;
+
+    @PrePersist
+    public void generateBaseId() {
+        this.baseId = sequence;
+        ++sequence;
+    }
+
+
 }

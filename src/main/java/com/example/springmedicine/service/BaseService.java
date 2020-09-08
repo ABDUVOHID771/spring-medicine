@@ -23,10 +23,10 @@ public abstract class BaseService<R extends BaseRepository<E>, E extends BaseEnt
         return repository.save(input);
     }
 
-    public E get(UUID uuid) {
-        Optional<E> entity = repository.findByUuid(uuid);
+    public E get(Long baseId) {
+        Optional<E> entity = repository.findByBaseId(baseId);
         if (entity.isEmpty()) {
-            throw new ResourceNotFoundException(uuid);
+            throw new ResourceNotFoundException(baseId.toString());
         }
         return entity.get();
     }
@@ -38,8 +38,8 @@ public abstract class BaseService<R extends BaseRepository<E>, E extends BaseEnt
     public abstract E update(E input);
 
     @Transactional
-    public void delete(UUID uuid) {
-        repository.deleteByUuid(uuid);
+    public void delete(Long baseId) {
+        repository.deleteByBaseId(baseId);
     }
 
 }

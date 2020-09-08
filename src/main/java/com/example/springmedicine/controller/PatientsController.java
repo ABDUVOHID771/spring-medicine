@@ -1,18 +1,24 @@
 package com.example.springmedicine.controller;
 
+import com.example.springmedicine.constants.ApiResults;
 import com.example.springmedicine.dao.domain.Doctors;
 import com.example.springmedicine.dao.domain.Patients;
+import com.example.springmedicine.dao.domain.base.Results;
+import com.example.springmedicine.dao.dto.DoctorsDto;
+import com.example.springmedicine.dao.dto.ListPatientsDto;
+import com.example.springmedicine.dao.dto.PatientsDto;
 import com.example.springmedicine.service.DoctorsService;
 import com.example.springmedicine.service.PatientsService;
+import com.google.common.base.Strings;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import javax.print.Doc;
+import java.util.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/patients")
 public class PatientsController {
@@ -46,51 +52,84 @@ public class PatientsController {
 
     // GET
 
-    @GetMapping("/{uuid}")
-    public ResponseEntity<Patients> read(@PathVariable UUID uuid) {
-        try {
-            return ResponseEntity
-                    .ok()
-                    .body(patientsService.get(uuid));
-        } catch (Exception e) {
-            return ResponseEntity
-                    .notFound().build();
+    @GetMapping
+    public ResponseEntity<?> read(@RequestHeader Map<String, String> headers) {
+        String baseId = headers.get("base_id");
+        if (!Strings.isNullOrEmpty(baseId)) {
+            try {
+                Patients patients = patientsService.get(Long.valueOf(baseId));
+                PatientsDto dto = new PatientsDto(ApiResults.OK, patients);
+                return new ResponseEntity<>(dto, HttpStatus.OK);
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                return new ResponseEntity<>(ApiResults.ERR_001, HttpStatus.NOT_FOUND);
+            }
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResults.ERR_003);
         }
+
+
     }
 
-    @GetMapping
-    public ResponseEntity<?> readAll() {
-        return ResponseEntity
-                .ok()
-                .body(patientsService.getAll());
+    @GetMapping("/all")
+    public ResponseEntity<?> readAll(@RequestHeader Map<String, String> headers) {
+        String baseId = headers.get("base_id");
+        Doctors doctors;
+        if (!Strings.isNullOrEmpty(baseId)) {
+            try {
+                doctors = doctorsService.get(Long.valueOf(baseId));
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                return new ResponseEntity<>(ApiResults.ERR_001, HttpStatus.NOT_FOUND);
+            }
+        } else {
+            return new ResponseEntity<>(ApiResults.ERR_001, HttpStatus.NOT_FOUND);
+        }
+
+        try {
+            List<Patients> patients = patientsService.getAllByPatients(doctors);
+            ListPatientsDto patientsDto = new ListPatientsDto(patients, ApiResults.OK);
+            return new ResponseEntity<>(patientsDto, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return new ResponseEntity<>(ApiResults.ERR_002, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 
     // EDIT
 
-    @PutMapping("/{uuid}")
-    public ResponseEntity<Patients> update(@RequestBody Patients input, @PathVariable UUID uuid) {
+    @PutMapping
+    public ResponseEntity<?> update(@RequestBody Patients input, @RequestHeader Map<String, String> headers) {
 
-        if (input.getUuid() != null && !input.getUuid().equals(uuid)) {
+        if (Strings.isNullOrEmpty(headers.get("base_id"))) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResults.ERR_002);
+        }
+        Long baseId = Long.valueOf(headers.get("base_id"));
+
+        if (input.getBaseId() != null && !input.getBaseId().equals(baseId)) {
             return ResponseEntity
-                    .status(HttpStatus.CONFLICT).build();
+                    .status(HttpStatus.CONFLICT).body(ApiResults.ERR_004);
         }
         try {
-            input.setUuid(uuid);
+            Patients patients = patientsService.update(input);
+            PatientsDto dto = new PatientsDto(ApiResults.OK, patients);
             return ResponseEntity
-                    .ok().body(patientsService.update(input));
+                    .ok().body(dto);
         } catch (Exception e) {
+            log.error(e.getMessage());
             return ResponseEntity
-                    .notFound().build();
+                    .status(HttpStatus.NOT_FOUND).body(ApiResults.ERR_001);
         }
 
     }
 
     // DELETE
 
-    @DeleteMapping("/{uuid}")
-    public ResponseEntity<Void> delete(@PathVariable UUID uuid) {
+    @DeleteMapping("/{baseId}")
+    public ResponseEntity<Void> delete(@PathVariable Long baseId) {
         try {
-            patientsService.delete(uuid);
+            patientsService.delete(baseId);
             return ResponseEntity
                     .noContent().build();
         } catch (Exception e) {

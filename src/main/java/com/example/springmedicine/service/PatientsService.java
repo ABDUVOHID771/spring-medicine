@@ -1,10 +1,13 @@
 package com.example.springmedicine.service;
 
+import com.example.springmedicine.dao.domain.Doctors;
 import com.example.springmedicine.dao.domain.Patients;
 import com.example.springmedicine.dao.repository.PatientsRepository;
 import com.example.springmedicine.exception.ResourceNotFoundException;
 import com.google.common.base.Strings;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class PatientsService extends BaseService<PatientsRepository, Patients> {
@@ -16,7 +19,7 @@ public class PatientsService extends BaseService<PatientsRepository, Patients> {
     @Override
     public Patients update(Patients input) {
 
-        Patients patient = getRepository().findByUuid(input.getUuid()).orElseThrow(() -> new ResourceNotFoundException(input.getUuid()));
+        Patients patient = getRepository().findByBaseId(input.getBaseId()).orElseThrow(() -> new ResourceNotFoundException(String.valueOf(input.getBaseId())));
 
         if (!Strings.isNullOrEmpty(input.getComplaints())) {
             patient.setComplaints(input.getComplaints());
@@ -44,5 +47,10 @@ public class PatientsService extends BaseService<PatientsRepository, Patients> {
 
         return getRepository().save(patient);
     }
+
+    public List<Patients> getAllByPatients(Doctors doctors) {
+        return getRepository().findAllByDoctors(doctors);
+    }
+
 
 }

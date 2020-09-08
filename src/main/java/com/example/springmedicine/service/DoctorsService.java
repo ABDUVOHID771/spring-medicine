@@ -19,7 +19,7 @@ public class DoctorsService extends BaseService<DoctorsRepository, Doctors> {
     @Override
     public Doctors update(Doctors input) {
 
-        Doctors doctor = getRepository().findByUuid(input.getUuid()).orElseThrow(() -> new ResourceNotFoundException(input.getUuid()));
+        Doctors doctor = getRepository().findByBaseId(input.getBaseId()).orElseThrow(() -> new ResourceNotFoundException(String.valueOf(input.getBaseId())));
 
         if (!Strings.isNullOrEmpty(input.getDoctorName())) {
             doctor.setDoctorName(input.getDoctorName());

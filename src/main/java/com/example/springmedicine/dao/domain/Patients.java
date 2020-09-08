@@ -1,6 +1,7 @@
 package com.example.springmedicine.dao.domain;
 
 import com.example.springmedicine.dao.domain.base.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
@@ -16,6 +17,7 @@ import java.util.Set;
 public class Patients extends BaseEntity {
 
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "patients", targetEntity = Doctors.class)
+    @JsonIgnore
     Set<Doctors> doctors = new HashSet<>();
 
     @Column(name = "patient_name")
@@ -41,5 +43,18 @@ public class Patients extends BaseEntity {
 
     @Column(name = "result_analysis")
     private String resultAnalysis;
+
+    @Column(unique = true, nullable = false, updatable = false)
+    private Long baseId;
+
+    @Transient
+    private static Long sequence = 1555L;
+
+    @PrePersist
+    public void generateBaseId() {
+        this.baseId = sequence;
+        ++sequence;
+    }
+
 
 }
